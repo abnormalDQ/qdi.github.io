@@ -28,6 +28,7 @@ CREATE TABLE `shop` (
   PRIMARY KEY (`shop_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 dbpartition by hash(`shop_id`)
 ```
+
 3.分表（table partition）
 dbpartition by hash(`shop_id`) 
 tbpartition by hash(`shop_id`) tbpartitions 3
@@ -38,6 +39,7 @@ CREATE TABLE `shop` (
   PRIMARY KEY (`shop_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 dbpartition by hash(`shop_id`) tbpartition by hash(`shop_id`) tbpartitions 3
 ``` 
+ <br/>
 4.广播表(broadcast):每个子SCHEMA 都存一份数据  
 ``` 
 CREATE TABLE `shop` (
