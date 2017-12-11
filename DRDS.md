@@ -22,7 +22,7 @@
 </table>
 2.分库(db partition)
 <p>一张表拆分到不同的db中</p>
-```
+```mysql
 CREATE TABLE `shop` (
   `shop_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(30) DEFAULT NULL,
