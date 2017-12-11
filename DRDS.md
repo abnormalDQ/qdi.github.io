@@ -118,3 +118,120 @@ CREATE TABLE `shop` (
   PRIMARY KEY (`shop_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 dbpartition by hash(`shop_id`)
 ```
+## 分表（table partition）
+*dbpartition by hash(`shop_id`) 
+*tbpartition by hash(`shop_id`) tbpartitions 3
+``` 
+CREATE TABLE `shop` (
+  `shop_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(30) DEFAULT NULL,
+  PRIMARY KEY (`shop_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 dbpartition by hash(`shop_id`) tbpartition by hash(`shop_id`) tbpartitions 3
+``` 
+
+## 广播表(broadcast):
+*每个子SCHEMA 都存一份数据  
+*广播表采用的是多写,在drds层面使用了sequence,一次性缓存10万
+``` 
+CREATE TABLE `shop` (
+  `shop_id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT BY GROUP,
+  `shop_name` varchar(64) DEFAULT NULL COMMENT '店铺名称',
+  PRIMARY KEY (`shop_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='店铺表' broadcast
+``` 
+
+
+## DRDS Sequence
+Group Sequence（GROUP）
+隐式 Sequence，在为主键定义 AUTO_INCREMENT 后，用于自动填充主键，由 DRDS 自动维护。
+broadcast 与 group 联合使用
+``` 
+CREATE TABLE `shop` (
+  `shop_id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT BY GROUP,
+  `shop_name` varchar(64) DEFAULT NULL COMMENT '店铺名称',
+  PRIMARY KEY (`shop_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='店铺表' broadcast
+``` 
+## UNIQUE key 失效
+``` 
+CREATE TABLE `shop` (
+  `id`  bigint(20) unsigned NOT NULL AUTO_INCREMENT by group,
+  `shop_id`  bigint(20) unsigned NOT NULL,
+  `sn` varchar(30) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `shop_id` (`shop_id`) USING BTREE,
+  UNIQUE KEY `sn` (`sn`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 dbpartition by hash(`shop_id`) 
+``` 
+INSERT INTO `print_tool`.`shard_table` (`shop_id`, `sn`) VALUES ( 1, '1');
+INSERT INTO `print_tool`.`shard_table` (`shop_id`, `sn`) VALUES ( 2, '1');
+## 主键不唯一 PRIMARY KEY
+``` 
+CREATE TABLE `shop` (
+  `id`  bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `shop_id`  bigint(20) unsigned NOT NULL,
+  `sn` varchar(30) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `shop_id` (`shop_id`) USING BTREE,
+  UNIQUE KEY `sn` (`sn`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 dbpartition by hash(`shop_id`) 
+``` 
+INSERT INTO `print_tool`.`shard_table` (`id`,`shop_id`, `sn`) VALUES ( 1,1, '1');
+INSERT INTO `print_tool`.`shard_table` (`id`,`shop_id`, `sn`) VALUES ( 1,2, '1');
+## sql 使用注意事项
+``` 
+CREATE TABLE `order_info` (
+  `order_id`  bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `shop_id`  bigint(20) unsigned NOT NULL,
+  `shipping_id`  bigint(20) unsigned NOT NULL,
+  `user_id`  bigint(20) unsigned NOT NULL,
+  `sn` varchar(30) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `shop_id` (`shop_id`) USING BTREE,
+  UNIQUE KEY `sn` (`sn`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 dbpartition by hash(`shop_id`);
+CREATE TABLE `order_goods` (
+  `id`  bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `shop_id`  bigint(20) unsigned NOT NULL,
+  `order_id`  bigint(20) unsigned NOT NULL,
+  `sn` varchar(30) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `shop_id` (`shop_id`) USING BTREE,
+  UNIQUE KEY `sn` (`sn`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 dbpartition by hash(`shop_id`)
+``` 
+``` 
+CREATE TABLE `shipping` (
+  `shipping_id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT BY GROUP,
+  `shipping_name` varchar(64) DEFAULT NULL COMMENT '店铺名称',
+  PRIMARY KEY (`shop_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='店铺表' broadcast;
+CREATE TABLE `user` (
+  `user_id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
+  `user_name` varchar(64) DEFAULT NULL COMMENT '店铺名称',
+  PRIMARY KEY (`shop_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='店铺表';
+``` 
+
+*分表单独查询，select * from order_info where shop_id = 11;
+*分表join
+``` 
+select * 
+from order_info oi 
+inner join order_goods og on oi.order_id = og.order_id and oi.shop_id = og.shop_id 
+where oi.shop_id = 101;
+``` 
+*分表和广播表join
+``` 
+select *
+from shipping ss 
+inner join order_info oi on ss.shipping_id = oi.shipping_id 
+where  oi.shop_id = 101 ;
+``` 
+*分表和单表join 效率非常低下。 
+``` 
+select *
+from user ss 
+inner join order_info oi on ss.user_id = oi.user_id 
+where  oi.shop_id = 101 ;
+``` 
