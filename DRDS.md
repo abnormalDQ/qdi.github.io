@@ -20,7 +20,8 @@
 </tr>
 <tr><td>columbu_jmay_0009</td></tr><tr><td>columbu_jmay_0010</td></tr><tr><td>columbu_jmay_0011</td></tr><tr><td>columbu_jmay_0012</td></tr><tr><td>columbu_jmay_0013</td></tr><tr><td>columbu_jmay_0014</td></tr><tr><td>columbu_jmay_0015</td></tr>
 </table>
-2.分库（db partition）
+2.分库(db partition)
+一张表拆分到不同的db中
 ```
 CREATE TABLE `shop` (
   `shop_id` bigint(20) NOT NULL AUTO_INCREMENT,
