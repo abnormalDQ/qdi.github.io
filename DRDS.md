@@ -38,20 +38,12 @@
 ##关于作者
 
 
-##分库(db partition)
-一张表拆分到不同的db中
-```mysql
-CREATE TABLE `shop` (
-  `shop_id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `name` varchar(30) ,
-  PRIMARY KEY (`shop_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 dbpartition by hash(`shop_id`)
-```
+
 
 ## ALIYUN DRDS 
-DRDS,2RDS,16SCHEMA
+
 <html>
- <head></head>
+ <head>DRDS,2RDS,16SCHEMA</head>
  <body>
   <table> 
    <tbody>
@@ -116,3 +108,13 @@ DRDS,2RDS,16SCHEMA
  </body>
 </html>
 
+## 分库(db partition)
+
+一张表拆分到不同的db中
+```mysql
+CREATE TABLE `shop` (
+  `shop_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(30) ,
+  PRIMARY KEY (`shop_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 dbpartition by hash(`shop_id`)
+```
