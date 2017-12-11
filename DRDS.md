@@ -130,8 +130,8 @@ CREATE TABLE `shop` (
 ``` 
 
 ## 广播表(broadcast):
-*每个子SCHEMA 都存一份数据  
-*广播表采用的是多写,在drds层面使用了sequence,一次性缓存10万
+* 每个子SCHEMA 都存一份数据  
+* 广播表采用的是多写,在drds层面使用了sequence,一次性缓存10万
 ``` 
 CREATE TABLE `shop` (
   `shop_id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT BY GROUP,
@@ -213,22 +213,22 @@ CREATE TABLE `user` (
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='店铺表';
 ``` 
 
-*分表单独查询，select * from order_info where shop_id = 11;
-*分表join
+* 分表单独查询，select * from order_info where shop_id = 11;
+* 分表join
 ``` 
 select * 
 from order_info oi 
 inner join order_goods og on oi.order_id = og.order_id and oi.shop_id = og.shop_id 
 where oi.shop_id = 101;
 ``` 
-*分表和广播表join
+* 分表和广播表join
 ``` 
 select *
 from shipping ss 
 inner join order_info oi on ss.shipping_id = oi.shipping_id 
 where  oi.shop_id = 101 ;
 ``` 
-*分表和单表join 效率非常低下。 
+* 分表和单表join 效率非常低下。 
 ``` 
 select *
 from user ss 
